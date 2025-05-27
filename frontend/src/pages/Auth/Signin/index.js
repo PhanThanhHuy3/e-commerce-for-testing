@@ -14,17 +14,19 @@ import {
   InputRightElement,
   Link,
 } from "@chakra-ui/react";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import biểu tượng từ react-icons
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useFormik } from "formik";
 import validationSchema from "./validations";
 import { fetchLogin } from "../../../api";
 import { useAuth } from "../../../contexts/AuthContext";
-import { Link as RouterLink } from "react-router-dom"; // Import RouterLink từ react-router-dom : npm install react-router-dom
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 
-function Signin({ history }) {
+function Signin() {
   const { login } = useAuth();
   const [showErrorIndicator, setShowErrorIndicator] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
@@ -35,6 +37,7 @@ function Signin({ history }) {
     onSubmit: async (values, bag) => {
       if (!values.email || !values.password) {
         setShowErrorIndicator(true);
+        return;
       } else {
         setShowErrorIndicator(false);
       }
@@ -45,7 +48,10 @@ function Signin({ history }) {
           password: values.password,
         });
         login(loginResponse);
-        history.push("/profile");
+        setShowSuccess(true);
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
       } catch (e) {
         bag.setErrors({ general: e.response.data.message });
       }
@@ -62,6 +68,9 @@ function Signin({ history }) {
           <Box my={5}>
             {formik.errors.general && (
               <Alert status="error">{formik.errors.general}</Alert>
+            )}
+            {showSuccess && (
+              <Alert status="success">Đăng nhập thành công!</Alert>
             )}
           </Box>
           <Box my={5} textAlign="left">
